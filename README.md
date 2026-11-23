@@ -2,9 +2,12 @@
 
 Landing page estática da campanha de aula experimental grátis. A página cobre a apresentação da campanha e o formulário. O fluxo de automação no n8n é configurado separadamente.
 
-**Página publicada:** https://hagmayer1969.github.io/academia_rede_ritmo/
+**Página publicada:**
 
-A publicação é feita pelo GitHub Pages: a cada push na `main`, o workflow [`.github/workflows/pages.yml`](.github/workflows/pages.yml) publica a pasta `dist/`.
+- Vercel: https://academiarederitmo.vercel.app
+- GitHub Pages: https://hagmayer1969.github.io/academia_rede_ritmo/
+
+Os dois endereços se atualizam sozinhos a cada push na `main`. A Vercel lê a pasta `dist/` pelo [`vercel.json`](vercel.json), e o GitHub Pages usa o workflow [`.github/workflows/pages.yml`](.github/workflows/pages.yml).
 
 ## Visualizar localmente
 
