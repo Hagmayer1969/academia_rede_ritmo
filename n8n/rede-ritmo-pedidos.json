@@ -7,7 +7,7 @@
         "path": "rede-ritmo/pedido",
         "responseMode": "responseNode",
         "options": {
-          "allowedOrigins": "*"
+          "allowedOrigins": "https://academiarederitmo.vercel.app,https://hagmayer1969.github.io,http://localhost:8000"
         }
       },
       "type": "n8n-nodes-base.webhook",
@@ -29,7 +29,7 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        2912,
+        3136,
         0
       ],
       "id": "bae3685f-0951-4a0b-b7f5-a52e22250cfe",
@@ -54,7 +54,7 @@
             {
               "id": "3e920bb2-f4c0-4253-ac52-a15f0f379dc9",
               "name": "whatsapp",
-              "value": "={{ ($json.body.whatsapp || '').replace(/\\D/g, '') }}",
+              "value": "={{ ($json.body.whatsapp || '').replace(/\\D/g, '').replace(/^55(?=\\d{10,11}$)/, '') }}",
               "type": "string"
             },
             {
@@ -137,7 +137,7 @@
     {
       "parameters": {
         "respondWith": "json",
-        "responseBody": "{ \"ok\": false, \"campo\": \"website\", \"mensagem\": \"Não foi possível enviar seu pedido. Atualize a página e tente novamente.\" }",
+        "responseBody": "{ \"ok\": false, \"campo\": \"site_url\", \"mensagem\": \"Não foi possível enviar seu pedido. Atualize a página e tente novamente.\" }",
         "options": {
           "responseCode": 400
         }
@@ -478,7 +478,7 @@
       "type": "n8n-nodes-base.switch",
       "typeVersion": 3.2,
       "position": [
-        1792,
+        2016,
         0
       ],
       "id": "49d9f6a6-578f-42ac-be31-db26bf2fc6bc",
@@ -495,7 +495,7 @@
       "type": "n8n-nodes-base.respondToWebhook",
       "typeVersion": 1.5,
       "position": [
-        2016,
+        2240,
         416
       ],
       "id": "50495df6-f573-48b7-b2c2-f99651169046",
@@ -536,7 +536,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        2016,
+        2240,
         -208
       ],
       "id": "0f4dfc71-94c1-45f8-988b-8b040b4ec542",
@@ -577,7 +577,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        2016,
+        2240,
         0
       ],
       "id": "bb556e3e-a056-4b2d-80bd-21deebf02030",
@@ -618,7 +618,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        2016,
+        2240,
         208
       ],
       "id": "3a08fbe2-ac0a-4094-ba62-c367ea73fbc5",
@@ -678,7 +678,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        2240,
+        2464,
         0
       ],
       "id": "3ef7a96f-2d02-4670-8887-d34eb12c20f3",
@@ -695,7 +695,7 @@
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
       "position": [
-        2464,
+        2688,
         0
       ],
       "id": "ca12fb8a-a86a-4342-bac4-302fbccda05b",
@@ -820,11 +820,90 @@
       "type": "n8n-nodes-base.dataTable",
       "typeVersion": 1.1,
       "position": [
-        2688,
+        2912,
         0
       ],
       "id": "85c996da-7af9-4964-af38-3dddc2b09ed3",
       "name": "Registrar pedido na tabela"
+    },
+    {
+      "parameters": {
+        "content": "## Rede Ritmo – Pedidos de aula experimental\nPágina: https://academiarederitmo.vercel.app\n\nRecebe os pedidos da página, padroniza, valida, classifica a urgência, avisa a recepção no Telegram e registra na tabela.\n\n**Objetivo:** a recepção ligar primeiro para quem tem pressa.",
+        "height": 360,
+        "width": 760
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -944
+      ],
+      "id": "9202798a-c41c-4b59-bcbb-1dd7c73ef179",
+      "name": "Nota 0 – Visão geral"
+    },
+    {
+      "parameters": {
+        "content": "## 1. Entrada e padronização (R1 e R2)\n- Webhook POST recebe o formulário da página\n- Nome sem espaços sobrando, e-mail em minúsculas, WhatsApp só com números (sem o +55)\n- Padronizamos ANTES de validar: assim ANA@Email.com e ana@email.com contam como o mesmo pedido",
+        "height": 720,
+        "width": 420,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -544
+      ],
+      "id": "a54f52a5-1dd4-49dd-bb2e-147641ec189c",
+      "name": "Nota 1 – Entrada e padronização"
+    },
+    {
+      "parameters": {
+        "content": "## 2. Validações (R6)\nCada IF pergunta \"tem problema?\". **true** = responde o erro e para; **false** = segue.\n- Campo isca (site_url) preenchido = robô\n- Nome vazio · e-mail inválido · WhatsApp sem 10 ou 11 dígitos\n- E-mail já na tabela = pedido repetido (409)",
+        "height": 720,
+        "width": 1540,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        400,
+        -544
+      ],
+      "id": "89fee386-5eaf-45e7-bc1f-5e29d30186cf",
+      "name": "Nota 2 – Validações"
+    },
+    {
+      "parameters": {
+        "content": "## 3. Regra de negócio (R3)\n- esta-semana = QUENTE → ligar hoje\n- este-mês = MORNO → ligar em até 2 dias\n- pesquisando = FRIO → enviar informações\n\nValor fora da lista cai no fallback com erro.\n\"Montar pedido completo\" junta os 3 caminhos num ponto só.",
+        "height": 1120,
+        "width": 620,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1984,
+        -544
+      ],
+      "id": "f3d82041-56b2-49ef-bc73-8f0454ff55b1",
+      "name": "Nota 3 – Regra de negócio"
+    },
+    {
+      "parameters": {
+        "content": "## 4. Aviso, registro e confirmação (R5 e R4)\n- Telegram avisa o grupo da recepção, com link direto para o WhatsApp\n- Token guardado em Credentials (não aparece no JSON)\n- Pedido gravado na tabela pedidos_aula_experimental\n- A página recebe uma mensagem personalizada conforme a temperatura",
+        "height": 720,
+        "width": 640,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2640,
+        -544
+      ],
+      "id": "a5e6005d-a859-45e6-a62a-4c551723c964",
+      "name": "Nota 4 – Aviso, registro e confirmação"
     }
   ],
   "connections": {
@@ -1050,7 +1129,7 @@
       ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1",
     "binaryMode": "separate",
@@ -1059,7 +1138,7 @@
     "callerPolicy": "workflowsFromSameOwner",
     "availableInMCP": false
   },
-  "versionId": "22d5caa3-7618-4fe0-b902-65e11065cf9d",
+  "versionId": "1cd757e5-794e-4baf-a07a-bc008d784269",
   "meta": {
     "instanceId": "d3023165a8aaf1568e82c3e73b19001e88c1967acf84f103af3d8d0403150468"
   },
