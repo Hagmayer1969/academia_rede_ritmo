@@ -2,6 +2,10 @@
 
 Landing page estática da campanha de aula experimental grátis. A página cobre a apresentação da campanha e o formulário. O fluxo de automação no n8n é configurado separadamente.
 
+**Página publicada:** https://hagmayer1969.github.io/academia_rede_ritmo/
+
+A publicação é feita pelo GitHub Pages: a cada push na `main`, o workflow [`.github/workflows/pages.yml`](.github/workflows/pages.yml) publica a pasta `dist/`.
+
 ## Visualizar localmente
 
 ```bash
