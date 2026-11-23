@@ -1,0 +1,1069 @@
+{
+  "name": "Rede Ritmo – Pedidos de Aula Experimental",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "rede-ritmo/pedido",
+        "responseMode": "responseNode",
+        "options": {
+          "allowedOrigins": "*"
+        }
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ced86609-29e9-4996-8402-6c52cc34b350",
+      "name": "Receber pedido da página",
+      "webhookId": "495ce11c-4b79-4a38-99b4-a2ca430b3120"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"ok\": true,\n  \"temperatura\": \"{{ $('Montar pedido completo').item.json.temperatura }}\",\n  \"mensagem\": \"Obrigado, {{ $('Montar pedido completo').item.json.nome.split(' ')[0] }}! {{ $('Montar pedido completo').item.json.mensagem_cliente }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2912,
+        0
+      ],
+      "id": "bae3685f-0951-4a0b-b7f5-a52e22250cfe",
+      "name": "Responder confirmação"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3b0ae426-a497-4972-bf2a-8cb23bb7b26d",
+              "name": "nome",
+              "value": "={{ ($json.body.nome || '').trim().replace(/\\s+/g, ' ') }}",
+              "type": "string"
+            },
+            {
+              "id": "21c7cf0a-bce1-4044-90cb-7538c8f0283d",
+              "name": "email",
+              "value": "={{ ($json.body.email || '').trim().toLowerCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "3e920bb2-f4c0-4253-ac52-a15f0f379dc9",
+              "name": "whatsapp",
+              "value": "={{ ($json.body.whatsapp || '').replace(/\\D/g, '') }}",
+              "type": "string"
+            },
+            {
+              "id": "65520341-c7be-47fe-9f79-abfa21727b4c",
+              "name": "unidade",
+              "value": "={{ ($json.body.unidade || '').trim().toLowerCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "200491c6-6cf7-4ce7-a14d-9dfde2357fe3",
+              "name": "modalidade",
+              "value": "={{ ($json.body.modalidade || '').trim().toLowerCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "173ea2e3-2009-489d-b5ac-e68e0147aef5",
+              "name": "inicio",
+              "value": "={{ ($json.body.inicio || '').trim().toLowerCase() }}",
+              "type": "string"
+            },
+            {
+              "id": "1d9a81cd-5584-4b0b-b948-c3a07b8a3127",
+              "name": "site_url",
+              "value": "={{ ($json.body.site_url || '').trim() }}",
+              "type": "string"
+            },
+            {
+              "id": "b38307d6-e50c-4e78-a0e8-dccd66a7a387",
+              "name": "recebido_em",
+              "value": "={{ $now.toFormat('dd/MM/yyyy HH:mm') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.5,
+      "position": [
+        224,
+        0
+      ],
+      "id": "72e82323-3687-4a14-9a76-1b75a09e01ab",
+      "name": "Padronizar dados"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "880002cc-be3b-4654-bbe1-75b853264f1b",
+              "leftValue": "={{ $json.site_url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        448,
+        0
+      ],
+      "id": "f532f62d-7da3-4fb4-a051-79d45c6c2a57",
+      "name": "Campo isca preenchido?"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{ \"ok\": false, \"campo\": \"website\", \"mensagem\": \"Não foi possível enviar seu pedido. Atualize a página e tente novamente.\" }",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        672,
+        -208
+      ],
+      "id": "5518818d-55ee-4192-ae3b-c2ece29e5afd",
+      "name": "Responder erro: robô"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "14e76d88-a256-4a05-aa45-c555d58f4f12",
+              "leftValue": "={{ $json.nome }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        672,
+        0
+      ],
+      "id": "18fa62f8-afc8-4f92-8904-1940bad3889b",
+      "name": "Nome vazio?"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{ \"ok\": false, \"campo\": \"nome\", \"mensagem\": \"Informe seu nome para continuar.\" }",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        896,
+        -208
+      ],
+      "id": "5f858a10-86b0-4975-879e-96bc3147c626",
+      "name": "Responder erro: nome"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "73cfefb7-54af-4044-8bc3-c027c44928e8",
+              "leftValue": "={{ $json.email }}",
+              "rightValue": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
+              "operator": {
+                "type": "string",
+                "operation": "notRegex"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        896,
+        0
+      ],
+      "id": "ef68273a-559a-4426-8255-a593e93cbd0b",
+      "name": "E-mail inválido?"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{ \"ok\": false, \"campo\": \"email\", \"mensagem\": \"Informe um e-mail válido, como nome@email.com.\" }",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1120,
+        -208
+      ],
+      "id": "a314318f-8326-4d92-94ce-ee0581cac7b6",
+      "name": "Responder erro: e-mail"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "dataTableId": {
+          "__rl": true,
+          "value": "rRvRmIskbbi0GXVG",
+          "mode": "list",
+          "cachedResultName": "pedidos_aula_experimental",
+          "cachedResultUrl": "/projects/eqlAYENsCGK6HwEn/datatables/rRvRmIskbbi0GXVG"
+        },
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "email",
+              "keyValue": "={{ $json.email }}"
+            }
+          ]
+        },
+        "limit": 1
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        1344,
+        0
+      ],
+      "id": "7522985c-9bd2-48e2-8e30-1478ac54bf47",
+      "name": "Buscar pedido com mesmo e-mail",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "b35ba9d2-5708-4bcb-89f8-b88190ab30d9",
+              "leftValue": "={{ $json.id }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        1568,
+        0
+      ],
+      "id": "0674c76b-cb2c-4983-827e-3fc60ab635c6",
+      "name": "Pedido repetido?"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{ \"ok\": false, \"campo\": \"email\", \"mensagem\": \"Já recebemos um pedido com este e-mail. Nossa equipe vai entrar em contato em breve.\" }",
+        "options": {
+          "responseCode": 409
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1792,
+        -208
+      ],
+      "id": "cd0d4502-5b06-4a05-a4c2-be1633070ed6",
+      "name": "Responder erro: pedido repetido"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 4
+          },
+          "conditions": [
+            {
+              "id": "03c5b7cb-ba94-47fa-8ac9-1e67bd7aa875",
+              "leftValue": "={{ $json.whatsapp.length }}",
+              "rightValue": 10,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            },
+            {
+              "id": "e67595ca-cbf8-4a0a-a888-8d76ad3e67a0",
+              "leftValue": "={{ $json.whatsapp.length }}",
+              "rightValue": 11,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.4,
+      "position": [
+        1120,
+        0
+      ],
+      "id": "b9d26f31-dbba-4201-aacc-c06b38e69d3c",
+      "name": "WhatsApp inválido?"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{ \"ok\": false, \"campo\": \"whatsapp\", \"mensagem\": \"Informe um WhatsApp válido com DDD, como (48) 99912-3456.\" }",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        1344,
+        -208
+      ],
+      "id": "458e0c9f-a124-403a-bc05-498d50adbddf",
+      "name": "Responder erro: WhatsApp"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Padronizar dados').item.json.inicio }}",
+                    "rightValue": "esta-semana",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "88ad68a5-d424-4228-ab90-1abea98b4e17"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "quente"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Padronizar dados').item.json.inicio }}",
+                    "rightValue": "este-mês",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "4b587375-2203-4df7-8a8d-a17e77e9f8f3"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "morno"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $('Padronizar dados').item.json.inicio }}",
+                    "rightValue": "pesquisando",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "2e25ece9-de8b-4f0f-a9b0-4752603eb646"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "frio"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "renameFallbackOutput": "outro"
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1792,
+        0
+      ],
+      "id": "49d9f6a6-578f-42ac-be31-db26bf2fc6bc",
+      "name": "Classificar urgência"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{ \"ok\": false, \"campo\": \"inicio\", \"mensagem\": \"Escolha quando você quer começar: esta semana, este mês ou se está pesquisando.\" }",
+        "options": {
+          "responseCode": 400
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.5,
+      "position": [
+        2016,
+        416
+      ],
+      "id": "50495df6-f573-48b7-b2c2-f99651169046",
+      "name": "Responder erro: início"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ed363162-0827-4b85-add0-ffe1b48e9863",
+              "name": "temperatura",
+              "value": "quente",
+              "type": "string"
+            },
+            {
+              "id": "3ee4faf5-4360-4bbb-a4a1-8bbe3e2cdd0c",
+              "name": "emoji",
+              "value": "🔥",
+              "type": "string"
+            },
+            {
+              "id": "5e4c9118-e512-4ad0-9864-9156fb67159a",
+              "name": "prioridade",
+              "value": "Ligar HOJE",
+              "type": "string"
+            },
+            {
+              "id": "becc4c65-351d-407c-b127-4832c1928fa9",
+              "name": "mensagem_cliente",
+              "value": "Vamos te chamar no WhatsApp ainda hoje para agendar sua aula experimental.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2016,
+        -208
+      ],
+      "id": "0f4dfc71-94c1-45f8-988b-8b040b4ec542",
+      "name": "Definir quente"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1d068d84-a454-4916-9c24-9f9b3ea96edf",
+              "name": "temperatura",
+              "value": "morno",
+              "type": "string"
+            },
+            {
+              "id": "3a1282ca-5004-48a3-ba9c-1ad24565f873",
+              "name": "emoji",
+              "value": "🌤️",
+              "type": "string"
+            },
+            {
+              "id": "ac4eda06-eccb-4d0d-9672-56de5963cce6",
+              "name": "prioridade",
+              "value": "Ligar em até 2 dias",
+              "type": "string"
+            },
+            {
+              "id": "0a2863d7-2114-48a4-97a4-f480d53c4dc6",
+              "name": "mensagem_cliente",
+              "value": "Vamos te chamar no WhatsApp nos próximos dias para combinar o melhor horário.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2016,
+        0
+      ],
+      "id": "bb556e3e-a056-4b2d-80bd-21deebf02030",
+      "name": "Definir morno"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "50e85788-a400-4e23-bfc7-59a629c7c0f0",
+              "name": "temperatura",
+              "value": "frio",
+              "type": "string"
+            },
+            {
+              "id": "338b093d-d9bc-4787-a1f9-add5f1713831",
+              "name": "emoji",
+              "value": "❄️",
+              "type": "string"
+            },
+            {
+              "id": "95127952-aadc-4005-a0f6-1eb3b1cb7480",
+              "name": "prioridade",
+              "value": "Enviar informações e ligar na semana",
+              "type": "string"
+            },
+            {
+              "id": "57aa36c2-a21f-49f0-b8fe-8468c42f9e53",
+              "name": "mensagem_cliente",
+              "value": "Vamos te mandar mais informações pelo WhatsApp. Quando quiser começar, é só responder.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2016,
+        208
+      ],
+      "id": "3a08fbe2-ac0a-4094-ba62-c367ea73fbc5",
+      "name": "Definir frio"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "55b26196-e5be-426f-ae4d-043995fdd5d5",
+              "name": "nome",
+              "value": "={{ $('Padronizar dados').item.json.nome }}",
+              "type": "string"
+            },
+            {
+              "id": "4916fbc4-2235-4af9-b449-020fac9607c9",
+              "name": "email",
+              "value": "={{ $('Padronizar dados').item.json.email }}",
+              "type": "string"
+            },
+            {
+              "id": "66c2e985-7016-4dbd-880b-933b63684c3e",
+              "name": "whatsapp",
+              "value": "={{ $('Padronizar dados').item.json.whatsapp }}",
+              "type": "string"
+            },
+            {
+              "id": "ff9aa171-ada3-46fb-9906-509fae8d8944",
+              "name": "unidade",
+              "value": "={{ $('Padronizar dados').item.json.unidade }}",
+              "type": "string"
+            },
+            {
+              "id": "fa77a022-165f-4850-9ef7-7e3c9561b43f",
+              "name": "modalidade",
+              "value": "={{ $('Padronizar dados').item.json.modalidade }}",
+              "type": "string"
+            },
+            {
+              "id": "8e9a48a3-6148-406d-bc4a-75ea913d65c6",
+              "name": "inicio",
+              "value": "={{ $('Padronizar dados').item.json.inicio }}",
+              "type": "string"
+            },
+            {
+              "id": "3c0120c7-d01c-4e45-9ea4-8825635ecc14",
+              "name": "recebido_em",
+              "value": "={{ $('Padronizar dados').item.json.recebido_em }}",
+              "type": "string"
+            }
+          ]
+        },
+        "includeOtherFields": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2240,
+        0
+      ],
+      "id": "3ef7a96f-2d02-4670-8887-d34eb12c20f3",
+      "name": "Montar pedido completo"
+    },
+    {
+      "parameters": {
+        "chatId": "-5412332043",
+        "text": "={{ $json.emoji }} NOVO PEDIDO – {{ $json.temperatura.toUpperCase() }}\n⏰ {{ $json.prioridade }}\n\n👤 {{ $json.nome }}\n📱 https://wa.me/55{{ $json.whatsapp }}\n✉️ {{ $json.email }}\n📍 Unidade: {{ $json.unidade }}\n🏋️ Modalidade: {{ $json.modalidade }}\n📅 Quer começar: {{ $json.inicio }}\n🕒 {{ $json.recebido_em }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2464,
+        0
+      ],
+      "id": "ca12fb8a-a86a-4342-bac4-302fbccda05b",
+      "name": "Avisar unidade no Telegram",
+      "webhookId": "5961e6e9-878d-46a5-baf6-a635579aee39",
+      "credentials": {
+        "telegramApi": {
+          "id": "6Z16j78UQc8IcKXO",
+          "name": "Telegram – Bot Rede Ritmo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataTableId": {
+          "__rl": true,
+          "value": "rRvRmIskbbi0GXVG",
+          "mode": "list",
+          "cachedResultName": "pedidos_aula_experimental",
+          "cachedResultUrl": "/projects/eqlAYENsCGK6HwEn/datatables/rRvRmIskbbi0GXVG"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "nome": "={{ $('Montar pedido completo').item.json.nome }}",
+            "email": "={{ $('Montar pedido completo').item.json.email }}",
+            "whatsapp": "={{ $('Montar pedido completo').item.json.whatsapp }}",
+            "unidade": "={{ $('Montar pedido completo').item.json.unidade }}",
+            "modalidade": "={{ $('Montar pedido completo').item.json.modalidade }}",
+            "inicio": "={{ $('Montar pedido completo').item.json.inicio }}",
+            "temperatura": "={{ $('Montar pedido completo').item.json.temperatura }}",
+            "recebido_em": "={{ $('Montar pedido completo').item.json.recebido_em }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "nome",
+              "displayName": "nome",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "whatsapp",
+              "displayName": "whatsapp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "unidade",
+              "displayName": "unidade",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "modalidade",
+              "displayName": "modalidade",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "inicio",
+              "displayName": "inicio",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "temperatura",
+              "displayName": "temperatura",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "recebido_em",
+              "displayName": "recebido_em",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dataTable",
+      "typeVersion": 1.1,
+      "position": [
+        2688,
+        0
+      ],
+      "id": "85c996da-7af9-4964-af38-3dddc2b09ed3",
+      "name": "Registrar pedido na tabela"
+    }
+  ],
+  "connections": {
+    "Receber pedido da página": {
+      "main": [
+        [
+          {
+            "node": "Padronizar dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Padronizar dados": {
+      "main": [
+        [
+          {
+            "node": "Campo isca preenchido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Campo isca preenchido?": {
+      "main": [
+        [
+          {
+            "node": "Responder erro: robô",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Nome vazio?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Nome vazio?": {
+      "main": [
+        [
+          {
+            "node": "Responder erro: nome",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "E-mail inválido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "E-mail inválido?": {
+      "main": [
+        [
+          {
+            "node": "Responder erro: e-mail",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "WhatsApp inválido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Buscar pedido com mesmo e-mail": {
+      "main": [
+        [
+          {
+            "node": "Pedido repetido?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pedido repetido?": {
+      "main": [
+        [
+          {
+            "node": "Responder erro: pedido repetido",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Classificar urgência",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WhatsApp inválido?": {
+      "main": [
+        [
+          {
+            "node": "Responder erro: WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Buscar pedido com mesmo e-mail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Classificar urgência": {
+      "main": [
+        [
+          {
+            "node": "Definir quente",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Definir morno",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Definir frio",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Responder erro: início",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Definir quente": {
+      "main": [
+        [
+          {
+            "node": "Montar pedido completo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Definir morno": {
+      "main": [
+        [
+          {
+            "node": "Montar pedido completo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Definir frio": {
+      "main": [
+        [
+          {
+            "node": "Montar pedido completo",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Montar pedido completo": {
+      "main": [
+        [
+          {
+            "node": "Avisar unidade no Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Avisar unidade no Telegram": {
+      "main": [
+        [
+          {
+            "node": "Registrar pedido na tabela",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Registrar pedido na tabela": {
+      "main": [
+        [
+          {
+            "node": "Responder confirmação",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "timeSavedMode": "fixed",
+    "timezone": "America/Sao_Paulo",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "versionId": "22d5caa3-7618-4fe0-b902-65e11065cf9d",
+  "meta": {
+    "instanceId": "d3023165a8aaf1568e82c3e73b19001e88c1967acf84f103af3d8d0403150468"
+  },
+  "nodeGroups": [],
+  "id": "OD4DQICTjRclewgT",
+  "tags": []
+}
